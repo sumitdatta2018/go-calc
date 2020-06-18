@@ -1,0 +1,64 @@
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: demo-volume
+  namespace: demo
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/ubuntu/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: demo-pv-claim
+  namespace: demo
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-calc-1-0
+spec:
+  selector:
+    app: go-calc-1-0
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-calc-1-0-deployment
+  labels:
+    app: go-calc-1-0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: go-calc-1-0
+  template:
+    metadata:
+      labels:
+        app: go-calc-1-0
+    spec:
+      containers:
+      - name: go-calc-1-0-container
+        image: sumitdatta2015/go-calc:latest
+        ports:
+        - containerPort: 8080
